@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Input</title>
+</head>
+<body>
+    <h1>Enter Variables</h1>
+    <form action="/generate-graph" method="post">
+        <label for="period">Period:</label>
+        <input type="number" id="period" name="period" required><br><br>
+        <label for="no_CSA">Number of CSA:</label>
+        <input type="number" id="no_CSA" name="no_CSA" required><br><br>
+        <label for="no_CSE">Number of CSE:</label>
+        <input type="number" id="no_CSE" name="no_CSE" required><br><br>
+        <label for="no_Temps">Number of Temps:</label>
+        <input type="number" id="no_Temps" name="no_Temps" required><br><br>
+        <label for="no_TL">Number of TL:</label>
+        <input type="number" id="no_TL" name="no_TL" required><br><br>
+        <input type="submit" value="Generate Graph">
+    </form>
+</body>
+</html>
