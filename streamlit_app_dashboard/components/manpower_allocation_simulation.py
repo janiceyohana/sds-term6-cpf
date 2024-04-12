@@ -4,9 +4,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 import itertools
 from statsmodels.tsa.arima.model import ARIMA
+import os
 
-# Load the manpower_working.csv file
-manpower_df = pd.read_csv('../data/manpower_working.csv')
+# Get the directory path of the current script file
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Navigate to the parent directory (one level up)
+parent_dir = os.path.dirname(current_dir)
+
+# Construct the file path to the CSV file
+file_path = os.path.join(parent_dir, 'data', 'Manpower_Working.csv')
+
+# Read the CSV file
+manpower_df = pd.read_csv(file_path)
 
 # Define ranges for case_closure_rate targets
 case_closure_rate_range = {
