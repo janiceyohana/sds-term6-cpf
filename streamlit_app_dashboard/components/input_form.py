@@ -64,8 +64,12 @@ def render():
 
     # Check if the file exists
     if not os.path.exists(stats_file_path):
-        st.error("Error: Data file not found.")
-        return
+        # Try going one more level up in case the file is located differently
+        parent_dir = os.path.dirname(parent_dir)
+        stats_file_path = os.path.join(parent_dir, 'data', '2022-2024_Stats.csv')
+        if not os.path.exists(stats_file_path):
+            st.error("Error: Data file not found.")
+            return
 
     # Read the CSV file
     df_combined = pd.read_csv(stats_file_path)
