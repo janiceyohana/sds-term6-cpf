@@ -8,8 +8,8 @@ import numpy as np
 import datetime
 
 # Load the CSV file
-manpower_df = pd.read_csv('./data/Manpower_Working.csv')
-df_productivity = pd.read_csv('data/Case_Closure_(Oct22-Mar24).csv')
+manpower_df = pd.read_csv('../data/Manpower_Working.csv')
+df_productivity = pd.read_csv('../data/Case_Closure_(Oct22-Mar24).csv')
 
 # Set the default values based on the last row of the DataFrame
 last_row = manpower_df.iloc[-1]
@@ -165,7 +165,7 @@ def prod_forecast(manpower_days, num_steps, p, d, q, manpower_df, surge_amt):
         temp_history.append(yhat)
 
     # Multiply forecasted values by number of agents
-    manpower_df = pd.read_csv('./data/Manpower_Working.csv')
+    manpower_df = pd.read_csv('../data/Manpower_Working.csv')
     num_csa = manpower_df.iloc[-1]['CSA']
     num_cse = manpower_df.iloc[-1]['CSE']
     num_temps = manpower_df.iloc[-1]['Temps']
@@ -184,8 +184,8 @@ def render(num_steps, p, d, q, start_date, end_date, manpower_days, button_optio
     st.header("Case Data Simulation")
 
     # Load the CSV file
-    manpower_df = pd.read_csv('./data/Manpower_Working.csv')
-    cases_df = pd.read_csv('./data/2022-2024_Stats.csv')
+    manpower_df = pd.read_csv('../data/Manpower_Working.csv')
+    cases_df = pd.read_csv('../data/2022-2024_Stats.csv')
 
     set_default_values()  # Ensure default values are set even after page refresh
 

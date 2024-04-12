@@ -51,7 +51,7 @@ def process_input_data(date_input, open_balance_input, new_cases_input, closed_c
 
 
 def render():
-    df_combined = pd.read_csv('data/2022-2024_Stats.csv')
+    df_combined = pd.read_csv('../data/2022-2024_Stats.csv')
     # Display input form
     st.header("Input Data")
     st.caption("Input Yesterday's Actual Case Data")

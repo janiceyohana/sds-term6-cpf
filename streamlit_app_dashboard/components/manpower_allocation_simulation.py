@@ -6,7 +6,7 @@ import itertools
 from statsmodels.tsa.arima.model import ARIMA
 
 # Load the manpower_working.csv file
-manpower_df = pd.read_csv('./data/manpower_working.csv')
+manpower_df = pd.read_csv('../data/manpower_working.csv')
 
 # Define ranges for case_closure_rate targets
 case_closure_rate_range = {
