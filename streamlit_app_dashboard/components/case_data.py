@@ -17,6 +17,8 @@ default_num_cse = last_row['CSE']
 default_num_csa = last_row['CSA']
 default_num_temps = last_row['Temps']
 
+surge_amt = []
+
 # Suppress deprecation warnings for st.experimental_get_query_params()
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -48,7 +50,7 @@ def set_default_values():
 # Function for ARIMA dynamic forecasting
 
 
-def arima_dynamic_forecast(train_days, num_steps, p, d, q, var_to_pred):
+def arima_dynamic_forecast(train_days, num_steps, p, d, q, surge_amt, var_to_pred):
     # Extract the specified column from the training data
     combined_train_data = train_days[var_to_pred]
 
@@ -65,12 +67,17 @@ def arima_dynamic_forecast(train_days, num_steps, p, d, q, var_to_pred):
 
         # Forecast the next value
         yhat = model_fit.forecast()[0]
-
+        # Apply surge percentage increase to the entire forecasted value
+        yhat *= (1 + surge_amt / 100)
         # Append the forecasted value to predictions
         predictions.append(yhat)
 
         # Update the history with the forecasted value
         history.append(yhat)
+
+        # percentage_increase = 1 + surge_amt / 100
+        # for i in range(len(predictions)):
+        #     predictions[i] *= percentage_increase
 
     return predictions
 
@@ -78,7 +85,7 @@ def arima_dynamic_forecast(train_days, num_steps, p, d, q, var_to_pred):
 # Define prod_forecast function
 
 
-def prod_forecast(manpower_days, num_steps, p, d, q, manpower_df):
+def prod_forecast(manpower_days, num_steps, p, d, q, manpower_df, surge_amt):
     # predict csa
     csa_train_data = manpower_days['Avg Case Closed Per CSA']
 
@@ -86,6 +93,18 @@ def prod_forecast(manpower_days, num_steps, p, d, q, manpower_df):
     csa_history = [x for x in csa_train_data]
 
     csa = list()
+
+    csa_train_data = manpower_days['Avg Case Closed Per CSA']
+    cse_train_data = manpower_days['Avg Case Closed Per CSE']
+    temps_train_data = manpower_days['Avg Case Closed per Temp']
+
+    csa_history = [x for x in csa_train_data]
+    cse_history = [x for x in cse_train_data]
+    temp_history = [x for x in temps_train_data]
+
+    csa_predictions = []
+    cse_predictions = []
+    temp_predictions = []
 
     # Iterate over the number of time steps to make predictions for 2024
     for i in range(num_steps):
@@ -146,6 +165,7 @@ def prod_forecast(manpower_days, num_steps, p, d, q, manpower_df):
         temp_history.append(yhat)
 
     # Multiply forecasted values by number of agents
+    manpower_df = pd.read_csv('./data/Manpower_Working.csv')
     num_csa = manpower_df.iloc[-1]['CSA']
     num_cse = manpower_df.iloc[-1]['CSE']
     num_temps = manpower_df.iloc[-1]['Temps']
@@ -185,7 +205,7 @@ def render(num_steps, p, d, q, start_date, end_date, manpower_days, button_optio
             with col2:
                 st.subheader("Expected change in Enquiry Volume")
                 st.caption("Value of percentage editable")
-                change_input = st.number_input(
+                surge_amt = st.number_input(
                     "Expected Change in Percentage (e.g. +2 / -1)", step=1)
 
             # Define the form submit button
@@ -210,50 +230,63 @@ def render(num_steps, p, d, q, start_date, end_date, manpower_days, button_optio
 
                 st.success("Graphs updated successfully!")
 
-        with st.container(border=True):
-            st.subheader("Simulated Open Balance")
-            st.write(f"From {start_date} to {end_date}")
+            with st.container(border=True):
+                st.subheader("Simulated Open Balance")
+                st.write(f"From {start_date} to {end_date}")
 
-            time_index = pd.date_range(start=start_date, end=end_date)
+                time_index = pd.date_range(start=start_date, end=end_date)
 
-            # Call arima_dynamic_forecast to forecast open balances
-            open_bal_predictions = arima_dynamic_forecast(
-                train_days, num_steps, p, d, q, var_to_pred='Open Balances')
-            day_0_pred = open_bal_predictions[0]
+                # Call arima_dynamic_forecast to forecast open balances
+                open_bal_predictions = arima_dynamic_forecast(
+                    train_days, num_steps, p, d, q, surge_amt, var_to_pred='Open Balances')
+                day_0_pred = open_bal_predictions[0]
 
-            sim_open = []
-            sim_open.append(day_0_pred)
+                sim_open = []
+                sim_open.append(day_0_pred)
 
-            # Calculate simulated open balances
-            new_cases_pred = arima_dynamic_forecast(
-                train_days, num_steps, p, d, q, var_to_pred="New Cases")
+                # Calculate simulated open balances
+                new_cases_pred = arima_dynamic_forecast(
+                    train_days, num_steps, p, d, q, surge_amt, var_to_pred="New Cases")
 
-            # Calculate cases_closed using prod_forecast
-            cases_closed = prod_forecast(
-                manpower_days, num_steps, p, d, q, manpower_df)
+                # Calculate cases_closed using prod_forecast
+                cases_closed = prod_forecast(
+                    manpower_days, num_steps, p, d, q, surge_amt, manpower_df)
 
-            for i in range(num_steps - 1):
-                # Check for NaN values before performing calculations
-                if np.isnan(new_cases_pred[i]) or np.isnan(cases_closed[i]):
-                    # Handle NaN values here (e.g., replace with a default value)
-                    pass
-                else:
-                    sim_open.append(
-                        sim_open[i] + new_cases_pred[i] - cases_closed[i])
+                for i in range(num_steps - 1):
+                    # Check for NaN values before performing calculations
+                    if np.isnan(new_cases_pred[i]) or np.isnan(cases_closed[i]):
+                        # Handle NaN values here (e.g., replace with a default value)
+                        pass
+                    else:
+                        sim_open.append(
+                            sim_open[i] + new_cases_pred[i] - cases_closed[i])
 
-            # Plot simulated open balances
-            # time_index = pd.date_range(start=start_date, end=end_date)
+                # Plot simulated open balances
+                # time_index = pd.date_range(start=start_date, end=end_date)
 
-            plt.figure(figsize=(18, 6))
-            plt.plot(time_index[:len(sim_open)], sim_open,
-                     label='Simulated Open Balances', color='green')
-            plt.title('')
-            plt.xlabel('Date')
-            plt.xticks(rotation=45)
-            plt.ylabel('Open Balance')
-            plt.grid(True)
-            # Display plot using st.pyplot()
-            st.pyplot(plt.gcf())
+                # Add tab selection
+                tab_graph, tab_table = st.tabs(["Graph", "Table"])
+
+                with tab_graph:
+                    # Plot simulated open balances
+                    plt.figure(figsize=(18, 6))
+                    plt.plot(time_index[:len(sim_open)], sim_open,
+                             label='Simulated Open Balances', color='green')
+                    plt.title('')
+                    plt.xlabel('Date')
+                    plt.xticks(rotation=45)
+                    plt.ylabel('Open Balance')
+                    plt.grid(True)
+                    # Display plot using st.pyplot()
+                    st.pyplot(plt.gcf())
+                with tab_table:
+                    # Calculate the table data
+                    open_table_data = pd.DataFrame({
+                        'Date': time_index[:len(sim_open)],
+                        'Simulated Open Balance': sim_open
+                    })
+                    # Display the table
+                    st.write(open_table_data)
 
             colnew, colclosed = st.columns([1, 1])
             with colnew:
@@ -266,16 +299,28 @@ def render(num_steps, p, d, q, start_date, end_date, manpower_days, button_optio
                     # Perform ARIMA dynamic forecasting for New Cases
                     original_data = cases_df['New Cases'][-60:]
                     dynamic_predictions = arima_dynamic_forecast(
-                        {'New Cases': original_data}, num_steps, p, d, q, var_to_pred="New Cases")
-                    # time_index = pd.date_range(start=start_date, end=end_date)
-                    plt.figure(figsize=(10, 6))
-                    plt.plot(time_index[:len(dynamic_predictions)], dynamic_predictions,
-                             label='Predictions 2024', color='red')
-                    plt.xlabel('Date')
-                    plt.xticks(rotation=45)
-                    plt.ylabel('New Cases')
-                    plt.grid(True)
-                    st.pyplot(plt.gcf())
+                        {'New Cases': original_data}, num_steps, p, d, q, surge_amt, var_to_pred="New Cases")
+
+                    # Add tab selection
+                    tab_graph, tab_table = st.tabs(["Graph", "Table"])
+                    with tab_graph:
+                        plt.figure(figsize=(10, 6))
+                        plt.plot(time_index[:len(dynamic_predictions)], dynamic_predictions,
+                                 label='Predictions 2024', color='red')
+                        plt.xlabel('Date')
+                        plt.xticks(rotation=45)
+                        plt.ylabel('New Cases')
+                        plt.grid(True)
+                        st.pyplot(plt.gcf())
+                    with tab_table:
+                        with tab_table:
+                            # Calculate the table data
+                            new_table_data = pd.DataFrame({
+                                'Date': time_index[:len(dynamic_predictions)],
+                                'Forecasted New Incoming Cases': dynamic_predictions
+                            })
+                            # Display the table
+                            st.write(new_table_data)
 
             with colclosed:
                 with st.container(border=True):
@@ -287,16 +332,27 @@ def render(num_steps, p, d, q, start_date, end_date, manpower_days, button_optio
                     # Perform ARIMA dynamic forecasting for Total Closed Cases
                     # Placeholder, replace with your data
                     cases_closed = prod_forecast(
-                        manpower_days, num_steps, p, d, q, manpower_df)
-                    # time_index = pd.date_range(start=start_date, end=end_date)
-                    plt.figure(figsize=(10, 6))
-                    plt.plot(time_index[:len(cases_closed)], cases_closed,
-                             label='Simulated Total Closed Cases', color='blue')
-                    plt.xlabel('Date')
-                    plt.xticks(rotation=45)
-                    plt.ylabel('Total Closed Cases')
-                    plt.grid(True)
-                    st.pyplot(plt.gcf())
+                        manpower_days, num_steps, p, d, q, manpower_df, surge_amt)
+
+                    # Add tab selection
+                    tab_graph, tab_table = st.tabs(["Graph", "Table"])
+                    with tab_graph:
+                        plt.figure(figsize=(10, 6))
+                        plt.plot(time_index[:len(cases_closed)], cases_closed,
+                                 label='Simulated Total Closed Cases', color='blue')
+                        plt.xlabel('Date')
+                        plt.xticks(rotation=45)
+                        plt.ylabel('Total Closed Cases')
+                        plt.grid(True)
+                        st.pyplot(plt.gcf())
+                    with tab_table:
+                        # Calculate the table data
+                        closed_table_data = pd.DataFrame({
+                            'Date': time_index[:len(cases_closed)],
+                            'Simulated Total Closed Cases': cases_closed
+                        })
+                        # Display the table
+                        st.write(closed_table_data)
 
 
 if __name__ == "__main__":
