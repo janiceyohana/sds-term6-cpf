@@ -79,14 +79,18 @@ def main():
             print(len(train_days), num_steps, p, d,
                   q, start_date, end_date, td_days)
 
+    # Pass start_date and end_date to the Streamlit app
+    input_form.render()
+
     # Handle checkbox selection
     on_checkbox_selected(selected_option)
 
-    # Pass start_date and end_date to the Streamlit app
-    input_form.render()
+    # Call case_data.render() after defining num_steps
     case_data.render(num_steps, p, d, q, start_date,
-                     end_date, df_productivity, button_options[selected_option], train_days)
-    manpower_allocation_simulation.render(p, d, q, num_steps, train_days, start_date, end_date)
+                     end_date, df_productivity, button_options, train_days)
+
+    manpower_allocation_simulation.render(
+        p, d, q, num_steps, train_days, start_date, end_date)
 
 
 if __name__ == "__main__":

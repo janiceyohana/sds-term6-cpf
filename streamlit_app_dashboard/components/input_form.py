@@ -54,7 +54,7 @@ def render():
     df_combined = pd.read_csv('data/2022-2024_Stats.csv')
     # Display input form
     st.header("Input Data")
-    st.caption("Input Actual Case Data")
+    st.caption("Input Yesterday's Actual Case Data")
 
     with st.container():
         with st.form(key='input_data_form'):
