@@ -17,10 +17,12 @@ parent_dir = os.path.dirname(current_dir)
 # Construct the file paths to the CSV files
 manpower_file_path = os.path.join(parent_dir, 'data', 'Manpower_Working.csv')
 productivity_file_path = os.path.join(parent_dir, 'data', 'Case_Closure_(Oct22-Mar24).csv')
+cases_file_path = os.path.join(parent_dir, 'data', '2022-2024_Stats.csv')
 
 # Read the CSV files
 manpower_df = pd.read_csv(manpower_file_path)
 df_productivity = pd.read_csv(productivity_file_path)
+cases_df = pd.read_csv(cases_file_path)
 
 # Set the default values based on the last row of the DataFrame
 last_row = manpower_df.iloc[-1]
