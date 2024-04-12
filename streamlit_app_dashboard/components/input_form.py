@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
+import os
 
 def process_input_data(date_input, open_balance_input, new_cases_input, closed_cases_input, df_combined):
     # Check if all inputs are provided
@@ -51,7 +52,19 @@ def process_input_data(date_input, open_balance_input, new_cases_input, closed_c
 
 
 def render():
-    df_combined = pd.read_csv('../data/2022-2024_Stats.csv')
+
+    # Get the directory path of the current script file
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Navigate to the parent directory (one level up)
+    parent_dir = os.path.dirname(current_dir)
+
+    # Construct the file path to the CSV file
+    stats_file_path = os.path.join(parent_dir, 'data', '2022-2024_Stats.csv')
+
+    # Read the CSV file
+    df_combined = pd.read_csv(stats_file_path)
+
     # Display input form
     st.header("Input Data")
     st.caption("Input Yesterday's Actual Case Data")
