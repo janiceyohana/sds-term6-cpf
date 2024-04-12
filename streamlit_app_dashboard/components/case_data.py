@@ -86,10 +86,6 @@ def arima_dynamic_forecast(train_days, num_steps, p, d, q, surge_amt, var_to_pre
         # Update the history with the forecasted value
         history.append(yhat)
 
-        # percentage_increase = 1 + surge_amt / 100
-        # for i in range(len(predictions)):
-        #     predictions[i] *= percentage_increase
-
     return predictions
 
 
@@ -176,7 +172,7 @@ def prod_forecast(manpower_days, num_steps, p, d, q, manpower_df, surge_amt):
         temp_history.append(yhat)
 
     # Multiply forecasted values by number of agents
-    manpower_df = pd.read_csv('../data/Manpower_Working.csv')
+    manpower_df = pd.read_csv(manpower_file_path)
     num_csa = manpower_df.iloc[-1]['CSA']
     num_cse = manpower_df.iloc[-1]['CSE']
     num_temps = manpower_df.iloc[-1]['Temps']
@@ -193,10 +189,6 @@ def prod_forecast(manpower_days, num_steps, p, d, q, manpower_df, surge_amt):
 
 def render(num_steps, p, d, q, start_date, end_date, manpower_days, button_options, train_days):
     st.header("Case Data Simulation")
-
-    # Load the CSV file
-    manpower_df = pd.read_csv('../data/Manpower_Working.csv')
-    cases_df = pd.read_csv('../data/2022-2024_Stats.csv')
 
     set_default_values()  # Ensure default values are set even after page refresh
 
@@ -237,7 +229,7 @@ def render(num_steps, p, d, q, start_date, end_date, manpower_days, button_optio
                                  manpower_df.columns.get_loc('CSA')] = num_csa_input
                 manpower_df.iloc[-1,
                                  manpower_df.columns.get_loc('Temps')] = num_temps_input
-                manpower_df.to_csv('./data/Manpower_Working.csv', index=False)
+                manpower_df.to_csv(manpower_file_path, index=False)
 
                 st.success("Graphs updated successfully!")
 
@@ -261,7 +253,7 @@ def render(num_steps, p, d, q, start_date, end_date, manpower_days, button_optio
 
                 # Calculate cases_closed using prod_forecast
                 cases_closed = prod_forecast(
-                    manpower_days, num_steps, p, d, q, surge_amt, manpower_df)
+                    manpower_days, num_steps, p, d, q, manpower_df, surge_amt)
 
                 for i in range(num_steps - 1):
                     # Check for NaN values before performing calculations
@@ -367,5 +359,4 @@ def render(num_steps, p, d, q, start_date, end_date, manpower_days, button_optio
 
 
 if __name__ == "__main__":
-    # Pass start_date and end_date from main.py to the render function
     render()
