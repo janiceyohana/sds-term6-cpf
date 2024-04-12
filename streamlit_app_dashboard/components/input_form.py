@@ -100,7 +100,7 @@ def render():
                     date_input, open_balance_input, new_cases_input, closed_cases_input, df_combined)
                 # st.write(df_combined)  # Display DataFrame in the app
                 # Save DataFrame to CSV file
-                df_combined.to_csv('data/2022-2024_Stats.csv', index=False)
+                df_combined.to_csv(stats_file_path, index=False)
 
 if __name__ == "__main__":
     render()
