@@ -62,6 +62,11 @@ def render():
     # Construct the file path to the CSV file
     stats_file_path = os.path.join(parent_dir, 'data', '2022-2024_Stats.csv')
 
+    # Check if the file exists
+    if not os.path.exists(stats_file_path):
+        st.error("Error: Data file not found.")
+        return
+
     # Read the CSV file
     df_combined = pd.read_csv(stats_file_path)
 
