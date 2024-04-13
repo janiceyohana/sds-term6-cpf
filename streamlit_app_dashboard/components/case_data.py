@@ -7,6 +7,8 @@ import itertools
 import numpy as np
 import datetime
 import os
+import time
+import uuid
 
 # Get the directory path of the current script file
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -19,11 +21,13 @@ manpower_file_path = os.path.join(parent_dir, 'data', 'Manpower_Working.csv')
 productivity_file_path = os.path.join(
     parent_dir, 'data', 'Case_Closure_(Oct22-Mar24).csv')
 cases_file_path = os.path.join(parent_dir, 'data', '2022-2024_Stats.csv')
+surge_path = os.path.join(parent_dir, 'data', 'Surge_Amt.csv')
 
 # Read the CSV files
 manpower_df = pd.read_csv(manpower_file_path)
 df_productivity = pd.read_csv(productivity_file_path)
 cases_df = pd.read_csv(cases_file_path)
+surge_df = pd.read_csv(surge_path)
 
 # Set the default values based on the last row of the DataFrame
 last_row = manpower_df.iloc[-1]
@@ -35,6 +39,11 @@ surge_amt = []
 
 # Suppress deprecation warnings for st.experimental_get_query_params()
 warnings.filterwarnings("ignore", category=DeprecationWarning)
+
+def calculate_new_cases_pred(train_days, num_steps, p, d, q, surge_amt):
+    # Calculate new_cases_pred using ARIMA or other methods
+    new_cases_pred = arima_dynamic_forecast(train_days, num_steps, p, d, q, surge_amt, var_to_pred="New Cases")
+    return new_cases_pred
 
 # Function to set default values based on session state or browser cookies
 
@@ -203,7 +212,9 @@ def render(num_steps, p, d, q, start_date, end_date, manpower_days, button_optio
     set_default_values()  # Ensure default values are set even after page refresh
 
     with st.container():
-        with st.form(key='case_data_form'):
+        # Generate a unique key for the form using a timestamp
+        form_key = f'case_data_form_{uuid.uuid4()}'
+        with st.form(key=form_key):
             col1, col2 = st.columns([1, 1])
             with col1:
                 st.subheader("Manpower Allocation")
@@ -231,6 +242,8 @@ def render(num_steps, p, d, q, start_date, end_date, manpower_days, button_optio
                 st.session_state.num_csa = num_csa_input
                 st.experimental_set_query_params(
                     num_cse=num_cse_input, num_temps=num_temps_input, num_csa=num_csa_input)
+                st.session_state.surge_amt = surge_amt
+                st.experimental_set_query_params(surge_amt=surge_amt)
 
                 # Update CSV file with new values
                 manpower_df.iloc[-1,
@@ -240,6 +253,9 @@ def render(num_steps, p, d, q, start_date, end_date, manpower_days, button_optio
                 manpower_df.iloc[-1,
                                  manpower_df.columns.get_loc('Temps')] = num_temps_input
                 manpower_df.to_csv(manpower_file_path, index=False)
+                surge_df.iloc[-1,
+                                 surge_df.columns.get_loc('surge_amt')] = surge_amt
+                surge_df.to_csv(surge_path.column, index=False)
 
                 st.success("Graphs updated successfully!")
 
@@ -272,12 +288,12 @@ def render(num_steps, p, d, q, start_date, end_date, manpower_days, button_optio
                         pass
                     else:
                         # Calculate simulated open balance for the current time step
-                        new_balance = sim_open[i] + new_cases_pred[i] - cases_closed[i]
+                        new_balance = sim_open[i] + \
+                            new_cases_pred[i] - cases_closed[i]
                         # Round down to the nearest whole number
                         new_balance_rounded = np.floor(new_balance)
                         # Append the rounded balance to the list of simulated open balances
                         sim_open.append(new_balance_rounded)
-
 
                 # Add tab selection
                 tab_graph, tab_table = st.tabs(["Graph", "Table"])
@@ -368,6 +384,8 @@ def render(num_steps, p, d, q, start_date, end_date, manpower_days, button_optio
                         })
                         # Display the table
                         st.write(closed_table_data)
+
+    return new_cases_pred
 
 
 if __name__ == "__main__":

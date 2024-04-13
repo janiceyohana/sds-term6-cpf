@@ -27,16 +27,11 @@ def main():
 
     col1, col2 = st.columns([3, 1])
     with col1:
-        st.html(
-            """
-          <div style="display: flex; align-items: center;">
-              <picture>
-                  <img src="cpf_logo.png" width="54" style="margin-right: 10px;"/>
-              </picture>
-              <h1 style="text-align: left; font-size: 50px;">Central Provident Fund Board</h1>
-          </div>
-          """
-        )
+        colimg, coltitle = st.columns([0.1, 1])
+        with colimg:
+            st.image('cpf_logo.jpg', width=80)
+        with coltitle:
+            st.title("Central Provident Fund Board")
     with col2:
         utc_now = datetime.utcnow()
         sgt_now = convert_utc_to_sgt(utc_now)
@@ -87,10 +82,10 @@ def main():
 
     # Call case_data.render() after defining num_steps
     case_data.render(num_steps, p, d, q, start_date,
-                     end_date, df_productivity, button_options, train_days)
-
-    manpower_allocation_simulation.render(
-        p, d, q, num_steps, train_days, start_date, end_date)
+     end_date, df_productivity, button_options, train_days)
+    # new_cases_pred = case_data.render(num_steps, p, d, q, start_date,
+    #                                   end_date, df_productivity, button_options, train_days)
+    manpower_allocation_simulation.render(num_steps, train_days, p, d, q)
 
 
 if __name__ == "__main__":
