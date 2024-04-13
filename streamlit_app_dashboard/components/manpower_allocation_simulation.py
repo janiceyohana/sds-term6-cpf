@@ -111,13 +111,15 @@ def render(num_steps, train_days, p, d, q):
         return
 
     with st.form(key='manpower_simulation_form'):
-        # Sidebar inputs
-        final_end_bal_input = st.number_input(
-            "Target end balance on last day of week/month", min_value=0, step=1)
-        curr_open_bal_input = st.number_input(
-            "Today's open balance", min_value=0, step=1)
-        remain_days_input = st.number_input(
-            "How many days remaining in the week/month would you like to forecast for", min_value=0, step=1)
+        with st.container():
+            st.subheader("Requirements")
+            # Sidebar inputs
+            final_end_bal_input = st.number_input(
+                "Target end balance on last day of week/month", min_value=0, step=1)
+            curr_open_bal_input = st.number_input(
+                "Today's open balance", min_value=0, step=1)
+            remain_days_input = st.number_input(
+                "How many days remaining in the week/month would you like to forecast for", min_value=0, step=1)
 
         # Define the form submit button
         submit_button = st.form_submit_button(label='Run Simulation')
