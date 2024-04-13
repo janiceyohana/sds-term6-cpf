@@ -16,7 +16,8 @@ parent_dir = os.path.dirname(current_dir)
 
 # Construct the file paths to the CSV files
 manpower_file_path = os.path.join(parent_dir, 'data', 'Manpower_Working.csv')
-productivity_file_path = os.path.join(parent_dir, 'data', 'Case_Closure_(Oct22-Mar24).csv')
+productivity_file_path = os.path.join(
+    parent_dir, 'data', 'Case_Closure_(Oct22-Mar24).csv')
 cases_file_path = os.path.join(parent_dir, 'data', '2022-2024_Stats.csv')
 
 # Read the CSV files
@@ -82,8 +83,10 @@ def arima_dynamic_forecast(train_days, num_steps, p, d, q, surge_amt, var_to_pre
         yhat = model_fit.forecast()[0]
         # Apply surge percentage increase to the entire forecasted value
         yhat *= (1 + surge_amt / 100)
+        # Round down to the nearest whole number
+        yhat_rounded = np.floor(yhat)
         # Append the forecasted value to predictions
-        predictions.append(yhat)
+        predictions.append(yhat_rounded)
 
         # Update the history with the forecasted value
         history.append(yhat)
@@ -125,9 +128,11 @@ def prod_forecast(manpower_days, num_steps, p, d, q, manpower_df, surge_amt):
         yhat = model_fit.forecast()[0]
         # Append the forecasted value to predictions
         csa.append(yhat)
+        # Round down to the nearest whole number
+        yhat_rounded = np.floor(yhat)
 
         # Update the history with the forecasted value
-        csa_history.append(yhat)
+        csa_history.append(yhat_rounded)
 
     # predict cse
     cse_train_data = manpower_days['Avg Case Closed Per CSE']
@@ -147,9 +152,10 @@ def prod_forecast(manpower_days, num_steps, p, d, q, manpower_df, surge_amt):
         yhat = model_fit.forecast()[0]
         # Append the forecasted value to predictions
         cse.append(yhat)
-
+        # Round down to the nearest whole number
+        yhat_rounded = np.floor(yhat)
         # Update the history with the forecasted value
-        cse_history.append(yhat)
+        cse_history.append(yhat_rounded)
 
     # predict temps
     temps_train_data = manpower_days['Avg Case Closed per Temp']
@@ -169,9 +175,10 @@ def prod_forecast(manpower_days, num_steps, p, d, q, manpower_df, surge_amt):
         yhat = model_fit.forecast()[0]
         # Append the forecasted value to predictions
         temp.append(yhat)
-
+        # Round down to the nearest whole number
+        yhat_rounded = np.floor(yhat)
         # Update the history with the forecasted value
-        temp_history.append(yhat)
+        temp_history.append(yhat_rounded)
 
     # Multiply forecasted values by number of agents
     manpower_df = pd.read_csv(manpower_file_path)
@@ -185,7 +192,8 @@ def prod_forecast(manpower_days, num_steps, p, d, q, manpower_df, surge_amt):
         total_cases_closed = csa_val * num_csa + \
             cse_val * num_cse + temp_val * num_temps
         cases_closed.append(total_cases_closed)
-
+    # Round down to the nearest whole number
+    cases_closed = np.floor(cases_closed)
     return cases_closed
 
 
@@ -263,11 +271,13 @@ def render(num_steps, p, d, q, start_date, end_date, manpower_days, button_optio
                         # Handle NaN values here (e.g., replace with a default value)
                         pass
                     else:
-                        sim_open.append(
-                            sim_open[i] + new_cases_pred[i] - cases_closed[i])
+                        # Calculate simulated open balance for the current time step
+                        new_balance = sim_open[i] + new_cases_pred[i] - cases_closed[i]
+                        # Round down to the nearest whole number
+                        new_balance_rounded = np.floor(new_balance)
+                        # Append the rounded balance to the list of simulated open balances
+                        sim_open.append(new_balance_rounded)
 
-                # Plot simulated open balances
-                # time_index = pd.date_range(start=start_date, end=end_date)
 
                 # Add tab selection
                 tab_graph, tab_table = st.tabs(["Graph", "Table"])
