@@ -45,14 +45,11 @@ def process_input_data(date_input, open_balance_input, new_cases_input, closed_c
         df_combined.reset_index(drop=True, inplace=True)
 
         return df_combined
-
     else:
         st.error("Error: Please fill in all input fields.")
         return df_combined  # Return original DataFrame if inputs are missing
 
-
 def render():
-
     # Get the directory path of the current script file
     current_dir = os.path.dirname(os.path.abspath(__file__))
 

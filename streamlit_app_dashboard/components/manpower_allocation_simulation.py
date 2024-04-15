@@ -21,7 +21,6 @@ surge_path = os.path.join(parent_dir, 'data', 'Surge_Amt.csv')
 manpower_df = pd.read_csv(manpower_file_path)
 surge_df = pd.read_csv(surge_path)
 
-
 def arima_dynamic_forecast(train_days, num_steps, p, d, q, surge_amt, var_to_pred):
     # Extract the specified column from the training data
     combined_train_data = train_days[var_to_pred]
@@ -58,9 +57,7 @@ def arima_dynamic_forecast(train_days, num_steps, p, d, q, surge_amt, var_to_pre
 
         # Update the history with the forecasted value
         history.append(yhat)
-
     return predictions
-
 
 def calculate_new_cases_pred(train_days, num_steps, p, d, q, surge_amt):
     # Calculate new_cases_pred using ARIMA or other methods
@@ -71,7 +68,6 @@ def calculate_new_cases_pred(train_days, num_steps, p, d, q, surge_amt):
         # Replace NaN values with a default value (e.g., 0)
         new_cases_pred[np.isnan(new_cases_pred)] = 0
     return new_cases_pred
-
 
 def total_cases_to_clear(final_end_bal, curr_open_bal, remain_days, new_cases_pred, num_steps):
     if remain_days == 0:
@@ -85,14 +81,12 @@ def total_cases_to_clear(final_end_bal, curr_open_bal, remain_days, new_cases_pr
                          sum(new_cases_remain_pred))/remain_days
         return case_to_clear
 
-
 def avg_load_per_role(clear_per_day, csa_input, cse_input, temps_input):
     avg_load_cse = clear_per_day / \
         (cse_input+(csa_input*0.67)+(temps_input*0.54))
     avg_load_csa = avg_load_cse*0.67
     avg_load_temps = avg_load_cse*0.54
     return int(avg_load_cse), int(avg_load_csa), int(avg_load_temps)
-
 
 def render(num_steps, train_days, p, d, q):
     st.title("Manpower Allocation Simulation")
@@ -154,7 +148,6 @@ def render(num_steps, train_days, p, d, q):
                 st.write(f"- CSE: {avg_load_cse}")
                 st.write(f"- CSA: {avg_load_csa}")
                 st.write(f"- Temps: {avg_load_temps}")
-
 
 if __name__ == "__main__":
     render()
