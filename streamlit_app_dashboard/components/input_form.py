@@ -105,6 +105,7 @@ def render():
             df_combined = process_input_data(
                 date_input, open_balance_input, new_cases_input, closed_cases_input, df_combined)
             # st.write(df_combined)  # Display DataFrame in the app
+            st.write(df_combined.tail(1)) # Display new added row (yst's data)
             # Save DataFrame to CSV file
             df_combined.to_csv(stats_file_path, index=False)
 
