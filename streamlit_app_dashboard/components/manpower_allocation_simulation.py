@@ -15,7 +15,7 @@ parent_dir = os.path.dirname(current_dir)
 
 # Construct the file paths to the CSV files
 manpower_file_path = os.path.join(parent_dir, 'data', 'Manpower_Working.csv')
-surge_path = os.path.join(parent_dir, 'data', 'Surge_Amt.csv')
+surge_path = os.path.join(parent_dir, 'data', 'Surge_Amount.csv')
 
 # Read the CSV files
 manpower_df = pd.read_csv(manpower_file_path)
@@ -98,7 +98,7 @@ def render(num_steps, train_days, p, d, q):
     parent_dir = os.path.dirname(current_dir)
 
     # Construct the file paths to the CSV files
-    surge_path = os.path.join(parent_dir, 'data', 'Surge_Amt.csv')
+    surge_path = os.path.join(parent_dir, 'data', 'Surge_Amount.csv')
 
     surge_df = pd.read_csv(surge_path)
     last_row_surge = surge_df.iloc[-1]
