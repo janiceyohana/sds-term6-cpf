@@ -62,7 +62,6 @@ def arima_dynamic_forecast(train_days, num_steps, p, d, q, surge_amt, var_to_pre
     return predictions
 
 
-
 def calculate_new_cases_pred(train_days, num_steps, p, d, q, surge_amt):
     # Calculate new_cases_pred using ARIMA or other methods
     new_cases_pred = arima_dynamic_forecast(
@@ -98,7 +97,19 @@ def avg_load_per_role(clear_per_day, csa_input, cse_input, temps_input):
 def render(num_steps, train_days, p, d, q):
     st.title("Manpower Allocation Simulation")
 
-    surge_amt = surge_df['surge_amt']
+    # Get the directory path of the current script file
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Navigate to the parent directory (one level up)
+    parent_dir = os.path.dirname(current_dir)
+
+    # Construct the file paths to the CSV files
+    surge_path = os.path.join(parent_dir, 'data', 'Surge_Amt.csv')
+
+    surge_df = pd.read_csv(surge_path)
+    last_row_surge = surge_df.iloc[-1]
+    surge_amt = last_row_surge['surge_amt']
+
     new_cases_pred = calculate_new_cases_pred(
         train_days, num_steps, p, d, q, surge_amt)
 

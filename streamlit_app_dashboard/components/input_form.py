@@ -103,13 +103,13 @@ def render():
             # Form submission button for input data
             submit_button = st.form_submit_button(label='Submit')
 
-            if submit_button:
-                # Process the input data
-                df_combined = process_input_data(
-                    date_input, open_balance_input, new_cases_input, closed_cases_input, df_combined)
-                # st.write(df_combined)  # Display DataFrame in the app
-                # Save DataFrame to CSV file
-                df_combined.to_csv(stats_file_path, index=False)
+        if submit_button:
+            # Process the input data
+            df_combined = process_input_data(
+                date_input, open_balance_input, new_cases_input, closed_cases_input, df_combined)
+            # st.write(df_combined)  # Display DataFrame in the app
+            # Save DataFrame to CSV file
+            df_combined.to_csv(stats_file_path, index=False)
 
 if __name__ == "__main__":
     render()
